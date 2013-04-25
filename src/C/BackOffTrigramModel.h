@@ -6,7 +6,7 @@ const static size_t MAXWORDSIZE=256;
 #define MAXBIGRAMSIZE ((size_t)(17 + 2 * MAXWORDSIZE))
 #define MAXTRIGRAMSIZE ((size_t)(17 + 3 * MAXWORDSIZE))
 
-const static zbyte UNKBYTESTR[]={0xFF, 0};
+const static uint8_t UNKBYTESTR[]={0xFF, 0};
 
 void
 read_arpa_file(FILE* arpafile, Pvoid_t* UP, Pvoid_t* UB, Pvoid_t* BP, Pvoid_t* BB, Pvoid_t* TP);

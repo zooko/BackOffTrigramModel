@@ -26,7 +26,7 @@ extern char const* const zutil_vernum; /* "1.0.0" */
  * This is guaranteed by standard C to be at least large enough to store at 
  * least 8 bits.  It is allowed to be larger.
  */
-typedef unsigned char zbyte;
+typedef char zbyte;
 
 /**
  * Decode two bytes into an unsigned short.  bs points to a buffer which must

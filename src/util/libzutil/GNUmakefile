@@ -28,7 +28,7 @@ else
  CFLAGS += -Wall -O2
 endif
 
-CFLAGS += -std=c99
+CFLAGS += -std=c99 -fPIC
 
 # SRCS=$(wildcard *.c)
 SRCS=zutil.c exhaust.c moreassert.c delegate.c

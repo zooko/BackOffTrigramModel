@@ -1,5 +1,5 @@
 /**
- * copyright 2002-2005 Bryce "Zooko" Wilcox-O'Hearn
+ * copyright 2002-2013 Zooko Wilcox-O'Hearn
  * mailto:zooko@zooko.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -86,8 +86,7 @@ static char const* const zstr_vernum = "0.9.8";
 #include "zutil.h" /* http://zooko.com/repos/libzutil */
 
 /**
- * A zstr is simply an unsigned int length and a pointer to a buffer of 
- * unsigned chars.
+ * A zstr is simply a size_t length and a pointer to a buffer of chars.
  */
 typedef struct {
 	size_t len; /* the length of the string (not counting the null-terminating character) */
@@ -95,8 +94,8 @@ typedef struct {
 } zstr;
 
 /**
- * A czstr is simply an unsigned int length and a pointer to a buffer of 
- * const unsigned chars.
+ * A czstr is simply an size_t length and a pointer to a buffer of const
+ * chars.
  */
 typedef struct {
 	size_t len; /* the length of the string (not counting the null-terminating character) */

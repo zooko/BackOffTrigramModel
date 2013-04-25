@@ -55,8 +55,8 @@ $(STATICLIB): $(OBJS)
 	$(AR) -r $@ $+
 	$(RANLIB) $@
 
-$(SHAREDLIB): $(OBJS)
-	$(CC) -o $@ $+ -shared -fPIC
+$(SHAREDLIB): $(OBJS) src/util/libzutil/libzutil.a src/util/libzstr/libzstr.a
+	$(CC) -o $@ $+ -shared -fPIC $(LDFLAGS)
 
 test:
 	PATH=$(PATH):$(PWD)/bin ; export PATH ; cd src/Python/BackOffTrigramModel && $(PYTHON) -m unittest discover

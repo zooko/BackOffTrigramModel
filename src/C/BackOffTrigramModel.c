@@ -19,7 +19,7 @@ const static size_t TRAILER=1; /* 1 character to make sure that strtod terminate
 void
 print_jt(Pvoid_t*const T) {
   PWord_t ptr;
-  zbyte index[MAXTRIGRAMSIZE+1];
+  uint8_t index[MAXTRIGRAMSIZE+1];
   zstr z;
 
   index[0] = '\0';
@@ -385,7 +385,7 @@ unigram_prob_1(const zstr unigram, Pvoid_t* pUP) {
 
   zbyte temp = unigram.buf[unigram.len];
   unigram.buf[unigram.len] = '\0';
-  JSLG(ptr, *pUP, unigram.buf);
+  JSLG(ptr, *pUP, (const uint8_t*)unigram.buf);
   unigram.buf[unigram.len] = temp;
   assert (ptr != NULL);
   return *(float*)ptr;
@@ -397,7 +397,7 @@ bigram_prob_2(const zstr bigram, const zstr unigram1, const zstr unigram2, Pvoid
 
   zbyte temp = bigram.buf[bigram.len];
   bigram.buf[bigram.len] = '\0';
-  JSLG(ptr, *pBP, bigram.buf);
+  JSLG(ptr, *pBP, (uint8_t*)bigram.buf);
   bigram.buf[bigram.len] = temp;
   if (ptr != NULL) {
     return *(float*)ptr;
@@ -405,7 +405,7 @@ bigram_prob_2(const zstr bigram, const zstr unigram1, const zstr unigram2, Pvoid
 
   temp = unigram1.buf[unigram1.len];
   unigram1.buf[unigram1.len] = '\0';
-  JSLG(ptr, *pUB, unigram1.buf);
+  JSLG(ptr, *pUB, (uint8_t*)unigram1.buf);
   unigram1.buf[unigram1.len] = temp;
   assert (ptr != NULL);
 
@@ -418,7 +418,7 @@ trigram_prob_3(const zstr trigram, const zstr bigram1, const zstr bigram2, const
 
   zbyte temp=trigram.buf[trigram.len];
   trigram.buf[trigram.len] = '\0';
-  JSLG(ptr, *pTP, trigram.buf);
+  JSLG(ptr, *pTP, (uint8_t*)trigram.buf);
   trigram.buf[trigram.len] = temp;
   if (ptr != NULL) {
     return *(float*)ptr;
@@ -428,7 +428,7 @@ trigram_prob_3(const zstr trigram, const zstr bigram1, const zstr bigram2, const
 
   temp=bigram1.buf[bigram1.len];
   bigram1.buf[bigram1.len] = '\0';
-  JSLG(ptr, *pBB, bigram1.buf);
+  JSLG(ptr, *pBB, (uint8_t*)bigram1.buf);
   bigram1.buf[bigram1.len] = temp;
   if (ptr != NULL) {
     return (*(float*)ptr) + bp;
@@ -462,15 +462,15 @@ split_trigram_and_unkify_in_place(zstr tri, zbyte* palimpsest, zstr*const pbi1, 
 
   zbyte temp = puni1->buf[puni1->len];
   puni1->buf[puni1->len] = '\0';
-  JSLG(ptr1, *pUP, puni1->buf);
+  JSLG(ptr1, *pUP, (const uint8_t*)puni1->buf);
   puni1->buf[puni1->len] = temp;
   temp = puni2->buf[puni2->len];
   puni2->buf[puni2->len] = '\0';
-  JSLG(ptr2, *pUP, puni2->buf);
+  JSLG(ptr2, *pUP, (const uint8_t*)puni2->buf);
   puni2->buf[puni2->len] = temp;
   temp = puni3->buf[puni3->len];
   puni3->buf[puni3->len] = '\0';
-  JSLG(ptr3, *pUP, puni3->buf);
+  JSLG(ptr3, *pUP, (const uint8_t*)puni3->buf);
   puni3->buf[puni3->len] = temp;
 
   if ((ptr1 == NULL) || (ptr2 == NULL) || (ptr3 == NULL)) {
