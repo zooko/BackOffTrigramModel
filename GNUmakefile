@@ -1,7 +1,4 @@
-NAME=BackOffTrigramModelPipe
-
-MAKESHAREDLIB=False
-# MAKESHAREDLIB=True
+NAME=BackOffTrigramModel
 
 INCDIRS=-Isrc/util/libzutil/ -Isrc/util/libzstr/ $(EXTRA_INC_DIRS)
 LIBDIRS=-Lsrc/util/libzutil/ -Lsrc/util/libzstr/ $(EXTRA_LIB_DIRS)
@@ -32,16 +29,13 @@ LDFLAGS += $(LIBDIRS) $(LIBS)
 
 # SRCS=$(wildcard *.c)
 SRCS=src/C/BackOffTrigramModel.c
-TMPIPESRCS=src/C/BackOffTrigramModelPipe.c
 OBJS=$(SRCS:%.c=%.o)
-TMPIPEOBJS=$(TMPIPESRCS:%.c=%.o)
 
-TMPIPE=bin/BackOffTrigramModelPipe
 STATICLIB=src/C/$(LIBPREFIX)$(NAME)$(STATICLIBSUFFIX)
 SHAREDLIB=src/C/$(LIBPREFIX)$(NAME)$(SHAREDLIBSUFFIX)
 
 
-all: $(TMPIPE) 
+all: $(SHAREDLIB) 
 
 src/util/libzutil/libzutil.a: 
 	cd src/util/libzutil && make libzutil.a
@@ -53,22 +47,9 @@ staticlib: $(STATICLIB)
 
 sharedlib: $(SHAREDLIB)
 
-# .d auto-dependency files
-ifneq ($(findstring clean,$(MAKECMDGOALS)),clean)
-ifneq (,$(SRCS:%.c=%.d))
--include $(SRCS:%.c=%.d)
-endif
-endif
-
 ifeq ($(PYTHON),)
 PYTHON=python
 endif
-
-%.d: %.c
-	@echo remaking $@
-	@set -e; $(CC) $(CPPFLAGS) $(CFLAGS) -MM $< \
-	| sed 's/\($*\)\.o[ :]*/\1.o $@ : GNUmakefile /g' > $@; \
-	[ -s $@ ] || rm -f $@
 
 $(STATICLIB): $(OBJS)
 	$(AR) -r $@ $+
@@ -77,18 +58,10 @@ $(STATICLIB): $(OBJS)
 $(SHAREDLIB): $(OBJS)
 	$(CC) -o $@ $+ -shared -fPIC
 
-$(TMPIPE): $(TMPIPEOBJS) $(STATICLIB) src/util/libzstr/libzstr.a
-	mkdir -p bin
-	$(CC) $+ -o $@ $(LDFLAGS)
-
 test:
 	PATH=$(PATH):$(PWD)/bin ; export PATH ; cd src/Python/BackOffTrigramModel && $(PYTHON) -m unittest discover
 
 clean:
-	-rm $(STATICLIB) $(SHAREDLIB) $(OBJS) $(TMPIPE) $(TMPIPEOBJS) *.d *.class 2>/dev/null
+	-rm $(STATICLIB) $(SHAREDLIB) $(OBJS) *.class 2>/dev/null
 
-install: $(TMPIPE)
-	-install $(TMPIPE) $(prefix)/bin
-	-$(PYTHON) setup.py install
-
-.PHONY: clean all staticlib sharedlib install
+.PHONY: clean all staticlib sharedlib
