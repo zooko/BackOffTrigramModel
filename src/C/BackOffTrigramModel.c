@@ -379,57 +379,68 @@ read_arpa_file(FILE*const arpafile, Pvoid_t*const pUP, Pvoid_t*const pUB, Pvoid_
   fprintf(stderr, "Finished reading trigrams: %u\n", numtrigrams); fflush(stderr);
 }
 
-double
-unigram_prob_1(const zstr unigram, Pvoid_t* pUP) {
+int
+unigram_in_vocab(const size_t unigram_len, const char* const unigram_buf, Pvoid_t* pUP) {
   PWord_t ptr;
 
-  zbyte temp = unigram.buf[unigram.len];
-  unigram.buf[unigram.len] = '\0';
-  JSLG(ptr, *pUP, (const uint8_t*)unigram.buf);
-  unigram.buf[unigram.len] = temp;
+  char temp = unigram_buf[unigram_len];
+  ((char*)unigram_buf)[unigram_len] = '\0';
+  JSLG(ptr, *pUP, (const uint8_t*)unigram_buf);
+  ((char*)unigram_buf)[unigram_len] = temp;
+  return (ptr != NULL);
+}
+
+double
+unigram_prob_1(const size_t unigram_len, const char* const unigram_buf, Pvoid_t* pUP) {
+  PWord_t ptr;
+
+  char temp = unigram_buf[unigram_len];
+  ((char*)unigram_buf)[unigram_len] = '\0';
+  JSLG(ptr, *pUP, (const uint8_t*)unigram_buf);
+  ((char*)unigram_buf)[unigram_len] = temp;
   assert (ptr != NULL);
   return *(float*)ptr;
 }
 
 double
-bigram_prob_2(const zstr bigram, const zstr unigram1, const zstr unigram2, Pvoid_t*const pUP, Pvoid_t*const pUB, Pvoid_t*const pBP) {
+bigram_prob_2(const size_t bigram_len, const char* const bigram_buf, const size_t unigram1_len, const char* const unigram1_buf, const size_t unigram2_len, const char* const unigram2_buf, Pvoid_t* const pUP, Pvoid_t* const pUB, Pvoid_t* const pBP) {
   PWord_t ptr;
 
-  zbyte temp = bigram.buf[bigram.len];
-  bigram.buf[bigram.len] = '\0';
-  JSLG(ptr, *pBP, (uint8_t*)bigram.buf);
-  bigram.buf[bigram.len] = temp;
+  zbyte temp = bigram_buf[bigram_len];
+  ((char*)bigram_buf)[bigram_len] = '\0';
+  JSLG(ptr, *pBP, (uint8_t*)bigram_buf);
+  ((char*)bigram_buf)[bigram_len] = temp;
   if (ptr != NULL) {
     return *(float*)ptr;
   }
 
-  temp = unigram1.buf[unigram1.len];
-  unigram1.buf[unigram1.len] = '\0';
-  JSLG(ptr, *pUB, (uint8_t*)unigram1.buf);
-  unigram1.buf[unigram1.len] = temp;
+  temp = unigram1_buf[unigram1_len];
+   ((char*)unigram1_buf)[unigram1_len] = '\0';
+  JSLG(ptr, *pUB, (uint8_t*)unigram1_buf);
+   ((char*)unigram1_buf)[unigram1_len] = temp;
   assert (ptr != NULL);
 
-  return *(float*)ptr + unigram_prob_1(unigram2, pUP);
+  return *(float*)ptr + unigram_prob_1(unigram1_len, unigram2_buf, pUP);
 }
 
 double
-trigram_prob_3(const zstr trigram, const zstr bigram1, const zstr bigram2, const zstr unigram1, const zstr unigram2, const zstr unigram3, Pvoid_t*const pUP, Pvoid_t*const pUB, Pvoid_t*const pBP, Pvoid_t*const pBB, Pvoid_t*const pTP) {
+trigram_prob_3(const size_t trigram_len, const char*const trigram_buf, const size_t bigram1_len, const char*const bigram1_buf, const size_t bigram2_len, const char*const bigram2_buf, const size_t unigram1_len, const char*const unigram1_buf, const size_t unigram2_len, const char*const unigram2_buf, const size_t unigram3_len, const char*const unigram3_buf, Pvoid_t* pUP, Pvoid_t* pUB, Pvoid_t* pBP, Pvoid_t* pBB, Pvoid_t* pTP) {
   PWord_t ptr;
 
-  zbyte temp=trigram.buf[trigram.len];
-  trigram.buf[trigram.len] = '\0';
-  JSLG(ptr, *pTP, (uint8_t*)trigram.buf);
-  trigram.buf[trigram.len] = temp;
+  zbyte temp=trigram_buf[trigram_len];
+  ((char*)trigram_buf)[trigram_len] = '\0';
+  JSLG(ptr, *pTP, (uint8_t*)trigram_buf);
+  ((char*)trigram_buf)[trigram_len] = temp;
   if (ptr != NULL) {
     return *(float*)ptr;
   }
 
-  double bp = bigram_prob_2(bigram2, unigram2, unigram3, pUP, pUB, pBP);
+  double bp = bigram_prob_2(bigram2_len, bigram2_buf, unigram2_len, unigram2_buf, unigram3_len, unigram3_buf, pUP, pUB, pBP);
 
-  temp=bigram1.buf[bigram1.len];
-  bigram1.buf[bigram1.len] = '\0';
-  JSLG(ptr, *pBB, (uint8_t*)bigram1.buf);
-  bigram1.buf[bigram1.len] = temp;
+  temp=bigram1_buf[bigram1_len];
+  ((char*)bigram1_buf)[bigram1_len] = '\0';
+  JSLG(ptr, *pBB, (uint8_t*)bigram1_buf);
+  ((char*)bigram1_buf)[bigram1_len] = temp;
   if (ptr != NULL) {
     return (*(float*)ptr) + bp;
   }
@@ -438,95 +449,103 @@ trigram_prob_3(const zstr trigram, const zstr bigram1, const zstr bigram2, const
 }
 
 void
-split_trigram_and_unkify_in_place(zstr tri, zbyte* palimpsest, zstr*const pbi1, zstr*const pbi2, zstr*const puni1, zstr*const puni2, zstr*const puni3, zstr* putri, zstr*const pubi1, zstr*const pubi2, zstr*const puuni1, zstr*const puuni2, zstr*const puuni3, Pvoid_t*const pUP) {
-  pbi1->buf = tri.buf;
-  puni1->buf = tri.buf;
+split_trigram_and_unkify_in_place(const size_t tri_len, const char*const tri_buf, char*const palimpsest, size_t*const pbi1_len_p, const char**const pbi1_buf_p, size_t*const pbi2_len_p, const char**const pbi2_buf_p, size_t*const puni1_len_p, const char**const puni1_buf_p, size_t *const puni2_len_p, const char**const puni2_buf_p, size_t*const puni3_len_p, const char**const puni3_buf_p, size_t*const putri_len_p, const char**const putri_buf_p, size_t*const pubi1_len_p, const char**const pubi1_buf_p, size_t*const pubi2_len_p, const char**const pubi2_buf_p, size_t*const puuni1_len_p, const char**const puuni1_buf_p, size_t*const puuni2_len_p, const char**const puuni2_buf_p, size_t*const puuni3_len_p, const char**const puuni3_buf_p, Pvoid_t* pUP) {
+  *pbi1_buf_p = tri_buf;
+  *puni1_buf_p = tri_buf;
 
-  const zbyte* p = zchr(cz(tri), ' ');
+  const char* p = strchr(tri_buf, ' ');
   assert (p != NULL);
 
-  puni1->len = p - puni1->buf;
-  pbi2->buf = (zbyte*)p+1;
-  pbi2->len = tri.len - puni1->len - 1;
-  puni2->buf = (zbyte*)p+1;
+  *puni1_len_p = p - *puni1_buf_p;
+  *pbi2_buf_p = p+1;
+  *pbi2_len_p = tri_len - *puni1_len_p - 1;
+  *puni2_buf_p = p+1;
 
-  p = zchr(cz(*pbi2), ' ');
+  p = strchr(*pbi2_buf_p, ' ');
   assert (p != NULL);
 
-  puni2->len = p - puni2->buf;
-  puni3->buf = (zbyte*)p+1;
-  pbi1->len = p - pbi1->buf;
-  puni3->len = tri.len - pbi1->len - 1;
+  *puni2_len_p = p - *puni2_buf_p;
+  *puni3_buf_p = p+1;
+  *pbi1_len_p = p - *pbi1_buf_p;
+  *puni3_len_p = tri_len - *pbi1_len_p - 1;
 
   PWord_t ptr1, ptr2, ptr3;
 
-  zbyte temp = puni1->buf[puni1->len];
-  puni1->buf[puni1->len] = '\0';
-  JSLG(ptr1, *pUP, (const uint8_t*)puni1->buf);
-  puni1->buf[puni1->len] = temp;
-  temp = puni2->buf[puni2->len];
-  puni2->buf[puni2->len] = '\0';
-  JSLG(ptr2, *pUP, (const uint8_t*)puni2->buf);
-  puni2->buf[puni2->len] = temp;
-  temp = puni3->buf[puni3->len];
-  puni3->buf[puni3->len] = '\0';
-  JSLG(ptr3, *pUP, (const uint8_t*)puni3->buf);
-  puni3->buf[puni3->len] = temp;
+  char temp = (*puni1_buf_p)[*puni1_len_p];
+  ((char*)(*puni1_buf_p))[*puni1_len_p] = '\0';
+  JSLG(ptr1, *pUP, (const uint8_t*)*puni1_buf_p);
+  ((char*)(*puni1_buf_p))[*puni1_len_p] = temp;
+  temp = (*puni2_buf_p)[*puni2_len_p];
+  ((char*)(*puni2_buf_p))[*puni2_len_p] = '\0';
+  JSLG(ptr2, *pUP, (const uint8_t*)*puni2_buf_p);
+  ((char*)(*puni2_buf_p))[*puni2_len_p] = temp;
+  temp = (*puni3_buf_p)[*puni3_len_p];
+  ((char*)(*puni3_buf_p))[*puni3_len_p] = '\0';
+  JSLG(ptr3, *pUP, (const uint8_t*)*puni3_buf_p);
+  ((char*)(*puni3_buf_p))[*puni3_len_p] = temp;
 
   if ((ptr1 == NULL) || (ptr2 == NULL) || (ptr3 == NULL)) {
     /* unkify */
     zbyte* q = palimpsest;
-    putri->buf = q;
-    puuni1->buf = q;
-    pubi1->buf = q;
+    *putri_buf_p = q;
+    *puuni1_buf_p = q;
+    *pubi1_buf_p = q;
     if (ptr1 == NULL) {
       *q++ = 0xFF;
     } else {
-      memcpy(q, puni1->buf, puni1->len);
-      q += puni1->len;
+      memcpy(q, *puni1_buf_p, *puni1_len_p);
+      q += *puni1_len_p;
     }
-    puuni1->len = q - puuni1->buf;
+    *puuni1_len_p = q - *puuni1_buf_p;
     *q++ = ' ';
 
-    puuni2->buf = q;
-    pubi2->buf = q;
+    *puuni2_buf_p = q;
+    *pubi2_buf_p = q;
     if (ptr2 == NULL) {
       *q++ = 0xFF;
     } else {
-      memcpy(q, puni2->buf, puni2->len);
-      q += puni2->len;
+      memcpy(q, *puni2_buf_p, *puni2_len_p);
+      q += *puni2_len_p;
     }
-    puuni2->len = q - puuni2->buf;
-    pubi1->len = q - putri->buf;
+    *puuni2_len_p = q - *puuni2_buf_p;
+    *pubi1_len_p = q - *putri_buf_p;
     *q++ = ' ';
 
-    puuni3->buf = q;
+    *puuni3_buf_p = q;
     if (ptr3 == NULL) {
       *q++ = 0xFF;
     } else {
-      memcpy(q, puni3->buf, puni3->len);
-      q += puni3->len;
+      memcpy(q, *puni3_buf_p, *puni3_len_p);
+      q += *puni3_len_p;
     }
-    puuni3->len = q - puuni3->buf;
-    pubi2->len = q - pubi2->buf;
-    putri->len = q - putri->buf;
+    *puuni3_len_p = q - *puuni3_buf_p;
+    *pubi2_len_p = q - *pubi2_buf_p;
+    *putri_len_p = q - *putri_buf_p;
   } else {
-    *putri = tri;
-    *pubi1 = *pbi1;
-    *pubi2 = *pbi2;
-    *puuni1 = *puni1;
-    *puuni2 = *puni2;
-    *puuni3 = *puni3;
+    *putri_len_p = tri_len;
+    *putri_buf_p = tri_buf;
+    *pubi1_len_p = *pbi1_len_p;
+    *pubi1_buf_p = *pbi1_buf_p;
+    *pubi2_len_p = *pbi2_len_p;
+    *pubi2_buf_p = *pbi2_buf_p;
+    *puuni1_len_p = *puni1_len_p;
+    *puuni1_buf_p = *puni1_buf_p;
+    *puuni2_len_p = *puni2_len_p;
+    *puuni2_buf_p = *puni2_buf_p;
+    *puuni3_len_p = *puni3_len_p;
+    *puuni3_buf_p = *puni3_buf_p;
   }
 }
 
 double
-trigram_split_unkify_prob_3(zstr tri, Pvoid_t* pUP, Pvoid_t* pUB, Pvoid_t* pBP, Pvoid_t* pBB, Pvoid_t* pTP) {
-    zstr b1, b2, u1, u2, u3;
-    zstr tu, bu1, bu2, uu1, uu2, uu3;
-    zbyte unkbuf[MAXTRIGRAMSIZE+1]; /* +1 for null-terminating char */
+trigram_split_unkify_prob_3(const size_t tri_len, const char*const tri_buf, Pvoid_t* pUP, Pvoid_t* pUB, Pvoid_t* pBP, Pvoid_t* pBB, Pvoid_t* pTP) {
+    size_t b1_len, b2_len, u1_len, u2_len, u3_len;
+    const char* b1_buf, *b2_buf, *u1_buf, *u2_buf, *u3_buf;
+    size_t tu_len, bu1_len, bu2_len, uu1_len, uu2_len, uu3_len;
+    const char* tu_buf, *bu1_buf, *bu2_buf, *uu1_buf, *uu2_buf, *uu3_buf;
+    char unkbuf[MAXTRIGRAMSIZE+1]; /* +1 for null-terminating char */
 
-    split_trigram_and_unkify_in_place(tri, unkbuf, &b1, &b2, &u1, &u2, &u3, &tu, &bu1, &bu2, &uu1, &uu2, &uu3, pUP);
-    return trigram_prob_3(tu, bu1, bu2, uu1, uu2, uu3, pUP, pUB, pBP, pBB, pTP);
+    split_trigram_and_unkify_in_place(tri_len, tri_buf, unkbuf, &b1_len, &b1_buf, &b2_len, &b2_buf, &u1_len, &u1_buf, &u2_len, &u2_buf, &u3_len, &u3_buf, &tu_len, &tu_buf, &bu1_len, &bu1_buf, &bu2_len, &bu2_buf, &uu1_len, &uu1_buf, &uu2_len, &uu2_buf, &uu3_len, &uu3_buf, pUP);
+    return trigram_prob_3(tu_len, tu_buf, bu1_len, bu1_buf, bu2_len, bu2_buf, uu1_len, uu1_buf, uu2_len, uu2_buf, uu3_len, uu3_buf, pUP, pUB, pBP, pBB, pTP);
 }
 

@@ -23,17 +23,20 @@ read_arpa_file(FILE* arpafile, Pvoid_t* UP, Pvoid_t* UB, Pvoid_t* BP, Pvoid_t* B
  * 
  */
 
-double
-unigram_prob_1(zstr unigram, Pvoid_t* pUP);
+int
+unigram_in_vocab(size_t unigram_len, const char* unigram_buf, Pvoid_t* pUP);
 
 double
-bigram_prob_2(zstr bigram, zstr unigram1, zstr unigram2, Pvoid_t* pUP, Pvoid_t* pUB, Pvoid_t* pBP);
+unigram_prob_1(size_t unigram_len, const char* unigram_buf, Pvoid_t* pUP);
+
+double
+bigram_prob_2(size_t bigram_len, const char* bigram_buf, size_t unigram1_len, const char* unigram1_buf, size_t unigram2_len, const char* unigram2_buf, Pvoid_t* pUP, Pvoid_t* pUB, Pvoid_t* pBP);
 
 /**
  * The data must be pre-unkified (using our 0xFF unk marker).
  */
 double
-trigram_prob_3(zstr trigram, zstr bigram1, zstr bigram2, zstr unigram1, zstr unigram2, zstr unigram3, Pvoid_t* pUP, Pvoid_t* pUB, Pvoid_t* pBP, Pvoid_t* pBB, Pvoid_t* pTP);
+trigram_prob_3(size_t trigram_len, const char* trigram_buf, size_t bigram1_len, const char* bigram1_buf, size_t bigram2_len, const char* bigram2_buf, size_t unigram1_len, const char* unigram1_buf, size_t unigram2_len, const char* unigram2_buf, size_t unigram3_len, const char* unigram3_buf, Pvoid_t* pUP, Pvoid_t* pUB, Pvoid_t* pBP, Pvoid_t* pBB, Pvoid_t* pTP);
 
 /* Set the .buf and .len members of pbi1, pbi2, puni1, puni2, and puni3 to 
  * point to the substrings of the trigram, as separated by the ' ' char.
@@ -46,7 +49,7 @@ trigram_prob_3(zstr trigram, zstr bigram1, zstr bigram2, zstr unigram1, zstr uni
  * @precondition utri.buf points to space which is sufficient to hold a copy of tri
  */
 void
-split_trigram_and_unkify_in_place(zstr tri, zbyte* buf, zstr* pbi1, zstr* pbi2, zstr* puni1, zstr* puni2, zstr* puni3, zstr* putri, zstr* pubi1, zstr* pubi2, zstr* puuni1, zstr* puuni2, zstr* puuni3, Pvoid_t* pUP);
+split_trigram_and_unkify_in_place(size_t tri_len, const char* tri_buf, char* buf, size_t* pbi1_len_p, const char** pbi1_buf_p, size_t* pbi2_len_p, const char** pbi2_buf_p, size_t* puni1_len_p, const char** puni1_buf_p, size_t* punit2_len_p, const char** puni2_buf_p, size_t* puni3_len_p, const char** puni3_buf_p, size_t* putri_len_p, const char** putri_buf_p, size_t* pubi1_len_p, const char** pubi1_buf_p, size_t* pubi2_len_p, const char** pubi2_buf_p, size_t* puuni1_len_p, const char** puuni1_buf_p, size_t* puuni2_len_p, const char** puuni2_buf_p, size_t* puuni3_len_p, const char** puuni3_buf_p, Pvoid_t* pUP);
 
 double 
-trigram_split_unkify_prob_3(zstr tri, Pvoid_t* pUP, Pvoid_t* pUB, Pvoid_t* pBP, Pvoid_t* pBB, Pvoid_t* pTP);
+trigram_split_unkify_prob_3(size_t tri_len, const char* tri_buf, Pvoid_t* pUP, Pvoid_t* pUB, Pvoid_t* pBP, Pvoid_t* pBB, Pvoid_t* pTP);
