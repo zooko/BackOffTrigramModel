@@ -429,6 +429,7 @@ trigram_prob_3(const size_t trigram_len, const char*const trigram_buf, const siz
 
   zbyte temp=trigram_buf[trigram_len];
   ((char*)trigram_buf)[trigram_len] = '\0';
+
   JSLG(ptr, *pTP, (uint8_t*)trigram_buf);
   ((char*)trigram_buf)[trigram_len] = temp;
   if (ptr != NULL) {
@@ -439,6 +440,7 @@ trigram_prob_3(const size_t trigram_len, const char*const trigram_buf, const siz
 
   temp=bigram1_buf[bigram1_len];
   ((char*)bigram1_buf)[bigram1_len] = '\0';
+
   JSLG(ptr, *pBB, (uint8_t*)bigram1_buf);
   ((char*)bigram1_buf)[bigram1_len] = temp;
   if (ptr != NULL) {
@@ -547,5 +549,22 @@ trigram_split_unkify_prob_3(const size_t tri_len, const char*const tri_buf, Pvoi
 
     split_trigram_and_unkify_in_place(tri_len, tri_buf, unkbuf, &b1_len, &b1_buf, &b2_len, &b2_buf, &u1_len, &u1_buf, &u2_len, &u2_buf, &u3_len, &u3_buf, &tu_len, &tu_buf, &bu1_len, &bu1_buf, &bu2_len, &bu2_buf, &uu1_len, &uu1_buf, &uu2_len, &uu2_buf, &uu3_len, &uu3_buf, pUP);
     return trigram_prob_3(tu_len, tu_buf, bu1_len, bu1_buf, bu2_len, bu2_buf, uu1_len, uu1_buf, uu2_len, uu2_buf, uu3_len, uu3_buf, pUP, pUB, pBP, pBB, pTP);
+}
+
+double
+three_unigrams_unkify_prob_3(const size_t uni1_len, const char*const uni1_buf, const size_t uni2_len, const char*const uni2_buf, const size_t uni3_len, const char*const uni3_buf, Pvoid_t* pUP, Pvoid_t* pUB, Pvoid_t* pBP, Pvoid_t* pBB, Pvoid_t* pTP) {
+    char buf[MAXTRIGRAMSIZE+1];
+    char*p = buf;
+    memcpy(p, uni1_buf, uni1_len);
+    p += uni1_len;
+    *p++ = ' ';
+    memcpy(p, uni2_buf, uni2_len);
+    p += uni2_len;
+    *p++ = ' ';
+    memcpy(p, uni3_buf, uni3_len);
+    p += uni3_len;
+    *p = '\0';
+    
+    return trigram_split_unkify_prob_3(p-buf, buf, pUP, pUB, pBP, pBB, pTP);
 }
 

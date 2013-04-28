@@ -2,11 +2,12 @@
 #include "zstr.h"
 
 const static size_t MAXWORDSIZE=256;
-#define MAXUNIGRAMSIZE ((size_t)(17 + MAXWORDSIZE))
+const static size_t MAXUNIGRAMSIZE=17 + 256;
 #define MAXBIGRAMSIZE ((size_t)(17 + 2 * MAXWORDSIZE))
 #define MAXTRIGRAMSIZE ((size_t)(17 + 3 * MAXWORDSIZE))
 
 const static uint8_t UNKBYTESTR[]={0xFF, 0};
+
 
 void
 read_arpa_file(FILE* arpafile, Pvoid_t* UP, Pvoid_t* UB, Pvoid_t* BP, Pvoid_t* BB, Pvoid_t* TP);
@@ -53,3 +54,7 @@ split_trigram_and_unkify_in_place(size_t tri_len, const char* tri_buf, char* buf
 
 double 
 trigram_split_unkify_prob_3(size_t tri_len, const char* tri_buf, Pvoid_t* pUP, Pvoid_t* pUB, Pvoid_t* pBP, Pvoid_t* pBB, Pvoid_t* pTP);
+
+double
+three_unigrams_unkify_prob_3(size_t uni1_len, const char* uni1_buf, size_t uni2_len, const char* uni2_buf, size_t uni3_len, const char* uni3_buf, Pvoid_t* pUP, Pvoid_t* pUB, Pvoid_t* pBP, Pvoid_t* pBB, Pvoid_t* pTP);
+
