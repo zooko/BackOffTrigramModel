@@ -396,10 +396,14 @@ unigram_prob_1(const size_t unigram_len, const char* const unigram_buf, Pvoid_t*
 
   char temp = unigram_buf[unigram_len];
   ((char*)unigram_buf)[unigram_len] = '\0';
+  fprintf(stderr, "xxx 0 Im in up1 and ub: %s\n", unigram_buf); fflush(stderr);
+  
   JSLG(ptr, *pUP, (const uint8_t*)unigram_buf);
   ((char*)unigram_buf)[unigram_len] = temp;
-  assert (ptr != NULL);
-  return *(float*)ptr;
+  if (ptr != NULL)
+      return *(float*)ptr;
+  else /* XXX ??? Whats the backoff? */
+      return 0;
 }
 
 double
@@ -408,6 +412,7 @@ bigram_prob_2(const size_t bigram_len, const char* const bigram_buf, const size_
 
   zbyte temp = bigram_buf[bigram_len];
   ((char*)bigram_buf)[bigram_len] = '\0';
+  fprintf(stderr, "xxx 1 Im in bp2 and bb %s\n", bigram_buf); fflush(stderr);
   JSLG(ptr, *pBP, (uint8_t*)bigram_buf);
   ((char*)bigram_buf)[bigram_len] = temp;
   if (ptr != NULL) {
@@ -416,11 +421,13 @@ bigram_prob_2(const size_t bigram_len, const char* const bigram_buf, const size_
 
   temp = unigram1_buf[unigram1_len];
    ((char*)unigram1_buf)[unigram1_len] = '\0';
+   fprintf(stderr, "xxx 2Im in bp2 and u1b %s\n", unigram1_buf); fflush(stderr);
+   
   JSLG(ptr, *pUB, (uint8_t*)unigram1_buf);
    ((char*)unigram1_buf)[unigram1_len] = temp;
   assert (ptr != NULL);
 
-  return *(float*)ptr + unigram_prob_1(unigram1_len, unigram2_buf, pUP);
+  return *(float*)ptr + unigram_prob_1(unigram2_len, unigram2_buf, pUP);
 }
 
 double
@@ -430,6 +437,8 @@ trigram_prob_3(const size_t trigram_len, const char*const trigram_buf, const siz
   zbyte temp=trigram_buf[trigram_len];
   ((char*)trigram_buf)[trigram_len] = '\0';
 
+  fprintf(stderr, "Im in tp3 and %s\n", trigram_buf); fflush(stderr);
+  
   JSLG(ptr, *pTP, (uint8_t*)trigram_buf);
   ((char*)trigram_buf)[trigram_len] = temp;
   if (ptr != NULL) {
@@ -564,6 +573,8 @@ three_unigrams_unkify_prob_3(const size_t uni1_len, const char*const uni1_buf, c
     memcpy(p, uni3_buf, uni3_len);
     p += uni3_len;
     *p = '\0';
+    
+    fprintf(stderr, "Im in 3 us u p 3, and %s\n", buf); fflush(stderr);
     
     return trigram_split_unkify_prob_3(p-buf, buf, pUP, pUB, pBP, pBB, pTP);
 }
