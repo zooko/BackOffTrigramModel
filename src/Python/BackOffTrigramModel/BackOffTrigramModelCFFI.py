@@ -75,7 +75,7 @@ class BackOffTMCFFI:
         C.read_arpa_file(inf, self.UP, self.UB, self.BP, self.BB, self.TP)
 
     def in_vocabulary(self, unigram):
-        return C.unigram_in_vocab(len(unigram), unigram, self.UP);
+        return C.unigram_in_vocab(len(unigram.encode('utf-8')), unigram.encode('utf-8'), self.UP);
 
     def vocabulary_with_prefix(self, prefix):
         palimpsest = ffi.new("char[274]")
@@ -92,10 +92,14 @@ class BackOffTMCFFI:
                 break
 
     def unigram_probability(self, unigram):
-        return C.unigram_prob_1(len(unigram), unigram, self.UP);
+        return C.unigram_prob_1(len(unigram.encode('utf-8')), unigram.encode('utf-8'), self.UP);
+        # if C.unigram_in_vocab(len(unigram.encode('utf-8')), unigram.encode('utf-8'), self.UP):
+        #     return C.unigram_prob_1(len(unigram.encode('utf-8')), unigram.encode('utf-8'), self.UP);
+        # else:
+        #     return 0; # XXX What's the right backoff here?
 
     def trigram_probability(self, unigram1, unigram2, unigram3):
-        return C.three_unigrams_unkify_prob_3(len(unigram1), unigram1, len(unigram2), unigram2, len(unigram3), unigram3, self.UP, self.UB, self.BP, self.BB, self.TP);
+        return C.three_unigrams_unkify_prob_3(len(unigram1.encode('utf-8')), unigram1.encode('utf-8'), len(unigram2.encode('utf-8')), unigram2.encode('utf-8'), len(unigram3.encode('utf-8')), unigram3.encode('utf-8'), self.UP, self.UB, self.BP, self.BB, self.TP);
 
 def test(arpafile):
     b = BackOffTMCFFI(arpafile)
