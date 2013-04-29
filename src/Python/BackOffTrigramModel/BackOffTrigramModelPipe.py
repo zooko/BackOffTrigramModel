@@ -5,7 +5,10 @@ import os, subprocess, codecs
 class BackOffTMPipe:
 
     def __init__(self, pathtotmpipeexecutable, pathtolangmod):
-        self.tmpipe = subprocess.Popen([pathtotmpipeexecutable, pathtolangmod], stdin=-1, stdout=-1)
+        try:
+            self.tmpipe = subprocess.Popen([pathtotmpipeexecutable, pathtolangmod], stdin=-1, stdout=-1)
+        except EnvironmentError, e:
+            raise EnvironmentError(e, (pathtotmpipeexecutable, pathtolangmod))
         self.stdin = self.tmpipe.stdin
         self.stdin_byte_writer = codecs.getwriter('utf-8')(self.tmpipe.stdin)
         self.stdout = self.tmpipe.stdout
@@ -26,7 +29,7 @@ class BackOffTMPipe:
             self.stdin_byte_writer.write("U\n") # Is this an unk model?
             try:
                 return float(self.stdout.readline())
-            except ValueError, exp:
+            except ValueError:
                 return None
 
     def trigram_probability(self, tokens):
