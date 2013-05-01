@@ -78,8 +78,11 @@ class BackOffTMCFFI:
         return C.unigram_in_vocab(len(unigram.encode('utf-8')), unigram.encode('utf-8'), self.UP);
 
     def vocabulary_with_prefix(self, prefix):
+        assert len(prefix) < 274, len(prefix)
         palimpsest = ffi.new("char[274]")
+        assert len(prefix) < len(palimpsest), (len(prefix), len(palimpsest))
         bufo = ffi.buffer(palimpsest)
+        assert len(bufo) > len(prefix), (len(bufo), len(prefix))
         bufo[:len(prefix)] = prefix
 
         ptr = C.JudySLFirst(self.UP[0], palimpsest, ffi.NULL)
