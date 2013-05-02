@@ -89,7 +89,7 @@ class BackOffTMCFFI:
         while (ptr is not ffi.NULL):
             pstr = ffi.string(palimpsest)
             if pstr[:len(prefix)] == prefix:
-                yield pstr
+                yield pstr.decode('utf-8')
                 ptr = C.JudySLNext(self.UP[0], palimpsest, ffi.NULL)
             else:
                 break
