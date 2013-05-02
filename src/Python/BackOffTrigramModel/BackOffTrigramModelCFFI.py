@@ -57,8 +57,8 @@ C = ffi.verify("""
 #include "Judy.h"
 #include "BackOffTrigramModel.h"
 """, 
-include_dirs=['src/C/', 'src/util/libzstr/', 'src/util/libzutil/',],
-library_dirs=['src/C/'],
+include_dirs=['/home/zooko/playground/BackOffTrigramModel/src/C/', '/home/zooko/playground/BackOffTrigramModel/src/util/libzstr/', '/home/zooko/playground/BackOffTrigramModel/src/util/libzutil/',],
+library_dirs=['/home/zooko/playground/BackOffTrigramModel/src/C/'],
 libraries=['Judy', 'BackOffTrigramModel']
 )
 

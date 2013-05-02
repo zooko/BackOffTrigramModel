@@ -11,8 +11,8 @@ SHAREDLIBSUFFIX=.so
 RANLIB=ranlib
 AR=ar
 
-DEBUGMODE=True
-# DEBUGMODE=False
+# DEBUGMODE=True
+DEBUGMODE=False
 
 ifeq ($(DEBUGMODE),True)
 CFLAGS=-Wall -O0 -Werror

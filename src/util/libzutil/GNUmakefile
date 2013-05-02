@@ -15,8 +15,8 @@ AR=ar
 
 INSTALLDIR=/usr/local/stow/lib$(NAME)
 
-DEBUGMODE=True
-# DEBUGMODE=False
+# DEBUGMODE=True
+DEBUGMODE=False
 
 ifeq ($(DEBUGMODE),True)
  CPPFLAGS += -UNDEBUG
