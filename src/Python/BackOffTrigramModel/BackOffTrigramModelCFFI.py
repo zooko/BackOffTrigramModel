@@ -78,6 +78,7 @@ class BackOffTMCFFI:
         return C.unigram_in_vocab(len(unigram.encode('utf-8')), unigram.encode('utf-8'), self.UP);
 
     def vocabulary_with_prefix(self, prefix):
+        assert isinstance(prefix, unicode), (repr(prefix), type(prefix))
         assert len(prefix) < 274, len(prefix)
         palimpsest = ffi.new("char[274]")
         assert len(prefix) < len(palimpsest), (len(prefix), len(palimpsest))
@@ -87,9 +88,9 @@ class BackOffTMCFFI:
 
         ptr = C.JudySLFirst(self.UP[0], palimpsest, ffi.NULL)
         while (ptr is not ffi.NULL):
-            pstr = ffi.string(palimpsest)
+            pstr = ffi.string(palimpsest).decode('utf-8')
             if pstr[:len(prefix)] == prefix:
-                yield pstr.decode('utf-8')
+                yield pstr
                 ptr = C.JudySLNext(self.UP[0], palimpsest, ffi.NULL)
             else:
                 break
